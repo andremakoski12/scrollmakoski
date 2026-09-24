@@ -1,692 +1,424 @@
-/* =========================================
-   CONFIGURAÇÕES GERAIS
-========================================= */
+// ========================================
+// MÚSICA
+// ========================================
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+const musica = document.getElementById("musica");
 
 
-html {
-  scroll-behavior: smooth;
-}
+function iniciarMusica() {
+
+  if (!musica.paused) {
+    return;
+  }
+
+  musica.volume = 0;
+
+  musica.play().then(() => {
+
+    const duracaoFade = 10000;
+
+    const inicio = performance.now();
 
 
-body {
+    function aumentarVolume(agora) {
 
-  background: #08091c;
+      const tempoPassado = agora - inicio;
 
-  color: white;
+      const progresso = Math.min(
+        tempoPassado / duracaoFade,
+        1
+      );
 
-  font-family: 'Short Stack', cursive;
-
-  overflow-x: hidden;
-}
-
-
-/* =========================================
-   MÚSICA
-========================================= */
-
-audio {
-  display: none;
-}
+      musica.volume = progresso;
 
 
-/* =========================================
-   ABERTURA
-========================================= */
+      if (progresso < 1) {
 
-.hero {
+        requestAnimationFrame(aumentarVolume);
 
-  height: 100vh;
+      } else {
 
-  position: relative;
+        musica.volume = 1;
 
-  display: flex;
+      }
 
-  justify-content: center;
+    }
 
-  align-items: center;
 
-  text-align: center;
+    requestAnimationFrame(aumentarVolume);
 
-  overflow: hidden;
+  }).catch((erro) => {
 
-  background:
-    radial-gradient(
-      circle at center,
-      #20265c 0%,
-      #0b0d24 50%,
-      #050610 100%
+    console.log(
+      "Não foi possível iniciar a música:",
+      erro
     );
-}
 
-
-.hero-content {
-
-  position: relative;
-
-  z-index: 5;
-
-  width: 90%;
-
-  max-width: 1000px;
+  });
 
 }
 
 
-.mini-title {
+// ========================================
+// PRIMEIRO TOQUE
+// ========================================
 
-  font-size: 18px;
-
-  letter-spacing: 4px;
-
-  text-transform: uppercase;
-
-  opacity: 0.6;
-
-  margin-bottom: 25px;
-}
-
-
-.hero h1 {
-
-  font-family: 'Zeyada', cursive;
-
-  font-size: clamp(80px, 15vw, 190px);
-
-  font-weight: normal;
-
-  line-height: 0.8;
-
-  letter-spacing: -5px;
-}
-
-
-.hero h1 span {
-
-  color: #ff5265;
-
-}
-
-
-.hero-subtitle {
-
-  margin-top: 40px;
-
-  font-size: 20px;
-
-  opacity: 0.65;
-}
-
-
-/* CORAÇÃO GIGANTE AO FUNDO */
-
-.hero-background-heart {
-
-  position: absolute;
-
-  font-size: 600px;
-
-  opacity: 0.025;
-
-  filter: blur(3px);
-
-  animation: heartFloat 5s ease-in-out infinite;
-
-}
-
-
-@keyframes heartFloat {
-
-  0% {
-    transform: scale(1);
+document.addEventListener(
+  "pointerdown",
+  iniciarMusica,
+  {
+    once: true
   }
-
-  50% {
-    transform: scale(1.1);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-
-}
+);
 
 
-/* INDICADOR */
+// ========================================
+// TODAS AS CENAS
+// ========================================
 
-.scroll-indicator {
-
-  position: absolute;
-
-  top: calc(100vh - 150px);
-
-  left: 50%;
-
-  transform: translateX(-50%);
-
-  opacity: 0.7;
-
-  width: 200px;
-}
+const cenas = document.querySelectorAll(".scene");
 
 
-.scroll-indicator span {
+// ========================================
+// FUNÇÃO PARA LIMITAR VALOR
+// ========================================
 
-  display: block;
+function clamp(valor, minimo, maximo) {
 
-  font-size: 35px;
-
-  animation: arrowMove 1.5s infinite;
-}
-
-
-.scroll-indicator p {
-
-  font-size: 12px;
-
-  letter-spacing: 2px;
-
-  text-transform: uppercase;
-}
-
-
-@keyframes arrowMove {
-
-  0% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(15px);
-  }
-
-  100% {
-    transform: translateY(0);
-  }
+  return Math.min(
+    Math.max(valor, minimo),
+    maximo
+  );
 
 }
 
 
-/* =========================================
-   CENAS
-========================================= */
+// ========================================
+// ANIMAÇÃO
+// ========================================
 
-.scene {
+function animarCenas() {
 
-  height: 250vh;
+  const alturaTela = window.innerHeight;
 
-  position: relative;
-}
 
+  cenas.forEach((cena) => {
 
-/* Essa parte fica parada na tela enquanto
-   o usuário continua rolando */
-
-.scene-sticky {
-
-  position: sticky;
-
-  top: 0;
-
-  height: 100vh;
-
-  width: 100%;
-
-  display: flex;
-
-  justify-content: center;
-
-  align-items: center;
-
-  overflow: hidden;
-}
-
-
-/* =========================================
-   NÚMEROS AO FUNDO
-========================================= */
-
-.background-number {
-
-  position: absolute;
-
-  font-family: 'Zeyada', cursive;
-
-  font-size: 60vw;
-
-  line-height: 1;
-
-  opacity: 0.025;
-
-  user-select: none;
-
-  pointer-events: none;
-}
-
-
-/* =========================================
-   FOTOS
-========================================= */
-
-.photo {
-
-  position: absolute;
-
-  width: min(500px, 70vw);
-
-  z-index: 3;
-
-  opacity: 0;
-
-  transform-origin: center center;
-
-  will-change: transform, opacity, filter;
-}
-
-
-.photo img {
-
-  display: block;
-
-  width: 100%;
-
-  height: auto;
-
-  border-radius: 6px;
-
-  box-shadow:
-    0 40px 100px rgba(0, 0, 0, 0.6);
-
-  user-select: none;
-}
-
-
-/* =========================================
-   TEXTO
-========================================= */
-
-.scene-text {
-
-  position: absolute;
-
-  z-index: 5;
-
-  width: 90%;
-
-  max-width: 1000px;
-
-  pointer-events: none;
-
-  opacity: 0;
-
-  will-change: transform, opacity;
-}
-
-
-.scene-text p {
-
-  font-family: 'Zeyada', cursive;
-
-  font-size: clamp(35px, 6vw, 75px);
-
-  line-height: 1;
-
-  margin-bottom: 20px;
-}
-
-
-.scene-text h2 {
-
-  font-size: clamp(45px, 7vw, 100px);
-
-  line-height: 0.95;
-
-  font-weight: normal;
-}
-
-
-.scene-text h2 span {
-
-  color: #ff5265;
-}
-
-
-.love-small {
-
-  margin-top: 30px;
-
-  font-size: 25px !important;
-
-  opacity: 0.7;
-}
-
-
-/* =========================================
-   CENA 1
-========================================= */
-
-.scene-one {
-
-  background:
-    radial-gradient(
-      circle at 70% 50%,
-      #272c65,
-      #090b20 60%,
-      #050610
+    const sticky = cena.querySelector(
+      ".scene-sticky"
     );
-}
 
-
-.photo-one {
-
-  left: 50%;
-
-  top: 50%;
-
-  transform:
-    translate(-50%, -50%)
-    scale(0.3)
-    rotate(-12deg);
-}
-
-
-.text-one {
-
-  left: 8%;
-
-  top: 65%;
-
-  transform:
-    translateY(80px);
-}
-
-
-/* =========================================
-   CENA 2
-========================================= */
-
-.scene-two {
-
-  background:
-    radial-gradient(
-      circle at 30% 50%,
-      #54283f,
-      #150b24 60%,
-      #050610
+    const photo = cena.querySelector(
+      ".photo"
     );
-}
 
-
-.photo-two {
-
-  left: 50%;
-
-  top: 50%;
-
-  transform:
-    translate(-50%, -50%)
-    scale(0.3)
-    rotate(12deg);
-}
-
-
-.text-two {
-
-  right: 8%;
-
-  top: 25%;
-
-  text-align: right;
-
-  transform:
-    translateY(-80px);
-}
-
-
-/* =========================================
-   CENA 3
-========================================= */
-
-.scene-three {
-
-  background:
-    radial-gradient(
-      circle at 50% 50%,
-      #3a1e48,
-      #0e0a20 60%,
-      #050610
+    const text = cena.querySelector(
+      ".scene-text"
     );
-}
 
 
-.photo-three {
-
-  left: 50%;
-
-  top: 50%;
-
-  transform:
-    translate(-50%, -50%)
-    scale(0.3)
-    rotate(-8deg);
-}
+    const rect =
+      cena.getBoundingClientRect();
 
 
-.text-three {
+    /*
+      Quando:
 
-  left: 50%;
+      rect.top = altura da tela
+      → ainda não começou
 
-  top: 18%;
+      rect.top = 0
+      → chegou no topo
 
-  text-align: center;
-
-  transform:
-    translateX(-50%)
-    translateY(-80px);
-}
+      rect.top = -altura da tela
+      → já passou
+    */
 
 
-/* =========================================
-   FINAL
-========================================= */
+    let progresso =
+      (alturaTela - rect.top) /
+      (alturaTela + rect.height);
 
-.ending {
 
-  min-height: 100vh;
-
-  display: flex;
-
-  justify-content: center;
-
-  align-items: center;
-
-  text-align: center;
-
-  position: relative;
-
-  overflow: hidden;
-
-  background:
-    radial-gradient(
-      circle at center,
-      #401b38,
-      #0a0819 70%
+    progresso = clamp(
+      progresso,
+      0,
+      1
     );
+
+
+    // ====================================
+    // FOTO
+    // ====================================
+
+    let fotoProgresso =
+      clamp(
+        progresso * 2,
+        0,
+        1
+      );
+
+
+    /*
+      Começa pequena
+      e termina grande
+    */
+
+    const escala =
+      0.3 +
+      fotoProgresso * 0.85;
+
+
+    /*
+      Faz uma pequena rotação
+    */
+
+    let rotacao = 0;
+
+
+    if (cena.classList.contains("scene-one")) {
+
+      rotacao =
+        -12 +
+        fotoProgresso * 12;
+
+    }
+
+
+    if (cena.classList.contains("scene-two")) {
+
+      rotacao =
+        12 -
+        fotoProgresso * 12;
+
+    }
+
+
+    if (cena.classList.contains("scene-three")) {
+
+      rotacao =
+        -8 +
+        fotoProgresso * 8;
+
+    }
+
+
+    // ====================================
+    // POSIÇÃO DA FOTO
+    // ====================================
+
+    let x = -50;
+
+    let y = -50;
+
+
+    /*
+      Cena 1:
+
+      a foto entra de baixo
+    */
+
+    if (
+      cena.classList.contains("scene-one")
+    ) {
+
+      y =
+        100 -
+        fotoProgresso * 150;
+
+    }
+
+
+    /*
+      Cena 2:
+
+      entra pela esquerda
+    */
+
+    if (
+      cena.classList.contains("scene-two")
+    ) {
+
+      x =
+        -150 +
+        fotoProgresso * 100;
+
+    }
+
+
+    /*
+      Cena 3:
+
+      entra de cima
+    */
+
+    if (
+      cena.classList.contains("scene-three")
+    ) {
+
+      y =
+        -150 +
+        fotoProgresso * 100;
+
+    }
+
+
+    // ====================================
+    // OPACIDADE DA FOTO
+    // ====================================
+
+    let opacidade = 0;
+
+
+    if (fotoProgresso < 0.2) {
+
+      opacidade =
+        fotoProgresso / 0.2;
+
+    } else {
+
+      opacidade = 1;
+
+    }
+
+
+    /*
+      Quando a cena está acabando,
+      começa a desaparecer
+    */
+
+    if (progresso > 0.8) {
+
+      opacidade =
+        1 -
+        ((progresso - 0.8) / 0.2);
+
+    }
+
+
+    opacidade =
+      clamp(
+        opacidade,
+        0,
+        1
+      );
+
+
+    // ====================================
+    // APLICA FOTO
+    // ====================================
+
+    photo.style.transform =
+
+      `translate(${x}%, ${y}%)
+       scale(${escala})
+       rotate(${rotacao}deg)`;
+
+
+    photo.style.opacity =
+      opacidade;
+
+
+    // ====================================
+    // TEXTO
+    // ====================================
+
+    let textoProgresso =
+      clamp(
+        (progresso - 0.25) / 0.35,
+        0,
+        1
+      );
+
+
+    /*
+      Texto sobe enquanto aparece
+    */
+
+    let textoY =
+      80 -
+      textoProgresso * 80;
+
+
+    let textoOpacidade =
+      textoProgresso;
+
+
+    /*
+      No final da cena,
+      texto desaparece
+    */
+
+    if (progresso > 0.75) {
+
+      textoOpacidade =
+        1 -
+        ((progresso - 0.75) / 0.25);
+
+    }
+
+
+    textoOpacidade =
+      clamp(
+        textoOpacidade,
+        0,
+        1
+      );
+
+
+    // ====================================
+    // POSIÇÃO DO TEXTO
+    // ====================================
+
+    if (
+      cena.classList.contains("scene-three")
+    ) {
+
+      text.style.transform =
+        `translateX(-50%)
+         translateY(${textoY}px)`;
+
+    } else {
+
+      text.style.transform =
+        `translateY(${textoY}px)`;
+
+    }
+
+
+    text.style.opacity =
+      textoOpacidade;
+
+  });
+
 }
 
 
-.ending-content {
+// ========================================
+// SCROLL
+// ========================================
 
-  position: relative;
-
-  z-index: 5;
-
-  width: 90%;
-
-  max-width: 1100px;
-}
-
-
-.ending-small {
-
-  font-size: 18px;
-
-  opacity: 0.5;
-
-  letter-spacing: 2px;
-}
-
-
-.ending h2 {
-
-  font-family: 'Zeyada', cursive;
-
-  font-weight: normal;
-
-  font-size: clamp(70px, 12vw, 160px);
-
-  line-height: 0.8;
-
-  margin-top: 30px;
-}
-
-
-.ending h3 {
-
-  font-family: 'Zeyada', cursive;
-
-  font-size: clamp(50px, 8vw, 100px);
-
-  font-weight: normal;
-
-  color: #ff6b7b;
-
-  margin-top: 30px;
-}
-
-
-.ending-heart {
-
-  font-size: 100px;
-
-  margin: 50px auto;
-
-  animation: pulseHeart 1.5s infinite;
-
-}
-
-
-.names {
-
-  font-size: 18px;
-
-  letter-spacing: 4px;
-
-  opacity: 0.6;
-}
-
-
-@keyframes pulseHeart {
-
-  0% {
-    transform: scale(1);
+window.addEventListener(
+  "scroll",
+  animarCenas,
+  {
+    passive: true
   }
-
-  50% {
-    transform: scale(1.25);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-
-}
+);
 
 
-/* =========================================
-   CELULAR
-========================================= */
+// ========================================
+// REDIMENSIONAMENTO
+// ========================================
 
-@media (max-width: 700px) {
-
-  .hero h1 {
-
-    font-size: 75px;
-
-    letter-spacing: -2px;
-
-  }
+window.addEventListener(
+  "resize",
+  animarCenas
+);
 
 
-  .hero-background-heart {
+// ========================================
+// PRIMEIRA EXECUÇÃO
+// ========================================
 
-    font-size: 350px;
-
-  }
-
-
-  .photo {
-
-    width: 78vw;
-
-  }
-
-
-  .scene-text p {
-
-    font-size: 38px;
-
-  }
-
-
-  .scene-text h2 {
-
-    font-size: 48px;
-
-  }
-
-
-  .text-one {
-
-    left: 7%;
-
-    top: 70%;
-
-  }
-
-
-  .text-two {
-
-    right: 7%;
-
-    top: 20%;
-
-  }
-
-
-  .text-three {
-
-    top: 12%;
-
-  }
-
-
-  .ending h2 {
-
-    font-size: 75px;
-
-  }
-
-
-  .ending h3 {
-
-    font-size: 55px;
-
-  }
-
-}
+animarCenas();
